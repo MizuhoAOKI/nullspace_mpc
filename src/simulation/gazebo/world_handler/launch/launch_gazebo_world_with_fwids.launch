@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+  <!-- load the fwids vehicle model -->
+  <arg name="open_rviz" default="false" />
+  <arg name="model" default="$(find world_handler)/xacro/fwids_vehicle.xacro"/>
+  <arg name="gazebo_world_name" default="maze"/> <!-- empty, empty_garden, cylinder_garden, maze -->
+  <arg name="rvizconfig" default="$(find world_handler)/rviz/fwids_vehicle.rviz" />
+  <param name="robot_description" command="$(find xacro)/xacro $(arg model) --inorder"/>
+
+  <!-- launch gazebo world -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find world_handler)/world/$(arg gazebo_world_name).world"/>
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="true"/>
+    <arg name="headless" value="false"/>
+    <arg name="debug" value="false"/>
+  </include>
+
+  <!-- spawn the model and prepare controllers for Gazebo -->
+  <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -x 0.0 -y 0.0 -z 0.5 -R 0 -P 0 -Y 0 -urdf -model fwids" />
+  <rosparam command="load" file="$(find world_handler)/config/fwids_controller.yaml" ns="fwids"/>
+  <node name="controller_spawner" pkg="controller_manager"
+        type="spawner" respawn="false"
+        output="screen" ns="/fwids"
+        args="joint_state_controller 
+              front_left_steer_rad front_left_rotor_radpersec 
+              front_right_steer_rad front_right_rotor_radpersec 
+              rear_left_steer_rad rear_left_rotor_radpersec 
+              rear_right_steer_rad rear_right_rotor_radpersec 
+        "/>
+
+  <!-- visualize the model in RViz -->
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+    <remap from="/joint_states" to="/fwids/joint_states" />
+  </node>
+
+  <!-- open rviz if necessary -->
+  <group if="$(arg open_rviz)"> 
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+  </group>
+
+  <!-- launch world_handler to inspect the gazebo process. it kills gazebo with Ctrl+C. -->
+  <node pkg="world_handler" type="world_handler_node" name="world_handler" output="screen" />
+
+</launch>

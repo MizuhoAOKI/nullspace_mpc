@@ -1,0 +1,35 @@
+# subscribing topic names
+joy_topic: /joy
+
+# publishing topic names
+control_cmd_vel_topic: /cmd_vel
+
+# joy button indices
+joy_top_left_button_idx: 4
+joy_top_right_button_idx: 5
+joy_left_stick_x_idx: 0
+joy_left_stick_y_idx: 1
+joy_right_stick_x_idx: 3
+joy_right_stick_y_idx: 4
+
+# absolute maximum values of linear and angular velocity
+
+## fast mode
+# abs_max_linear_vel_x: 3.0 # [m/s]
+# abs_max_linear_vel_y: 3.0 # [m/s]
+# abs_max_angular_vel_z: 6.28 # [rad/s]
+
+## normal mode
+abs_max_linear_vel_x: 1.5 # [m/s]
+abs_max_linear_vel_y: 1.5 # [m/s]
+abs_max_angular_vel_z: 3.14 # [rad/s]
+
+## slow mode
+# abs_max_linear_vel_x: 0.5 # [m/s]
+# abs_max_linear_vel_y: 0.5 # [m/s]
+# abs_max_angular_vel_z: 1.57 # [rad/s]
+
+## turtle mode
+# abs_max_linear_vel_x: 0.2 # [m/s]
+# abs_max_linear_vel_y: 0.2 # [m/s]
+# abs_max_angular_vel_z: 0.5 # [rad/s]

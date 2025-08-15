@@ -1,0 +1,207 @@
+name: CI of QpSolverCollection
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+  schedule:
+    - cron: '0 0 * * 0'
+
+jobs:
+
+  clang-format:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v3
+      - name: Install clang-format-10
+        run: |
+          sudo apt-get -qq update
+          sudo apt-get -qq install clang-format-10
+      - name: Run clang-format-check
+        run: |
+          ./.clang-format-check.sh
+
+  build-and-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-20.04]
+        build-type: [Debug, RelWithDebInfo]
+        standalone: [standalone, catkin]
+        solvers-from-source: [SolversFromSource, SolversFromAPT]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Set environment variables
+        run: |
+          echo "LD_LIBRARY_PATH=/opt/blasfeo/lib:/opt/hpipm/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV # for HPIPM
+      - name: Set ROS version
+        if: matrix.standalone == 'catkin'
+        run: |
+          if [ "${{ matrix.os }}" == "ubuntu-20.04" ]
+          then
+            echo "ROS_DISTRO=noetic" >> $GITHUB_ENV
+            echo "PYTHON_PACKAGE_PREFIX=python3" >> $GITHUB_ENV
+          else # if [ "${{ matrix.os }}" == "ubuntu-18.04" ]
+            echo "ROS_DISTRO=melodic" >> $GITHUB_ENV
+            echo "PYTHON_PACKAGE_PREFIX=python" >> $GITHUB_ENV
+          fi
+      - name: Check secrets
+        run: |
+          if test -n "$GITLAB_TOKEN"; then
+            echo "Install private solvers."
+            echo "ENABLE_PRIVATE_SOLVERS=ON" >> $GITHUB_ENV
+            echo "SKIP_PRIVATE_SOLVER_TEST=OFF" >> $GITHUB_ENV
+            git config --global url."https://m-murooka_at_aist_go_jp:${GITLAB_TOKEN}@gite.lirmm.fr/".insteadOf git@gite.lirmm.fr:
+          else
+            echo "NOT install private solvers."
+            echo "ENABLE_PRIVATE_SOLVERS=OFF" >> $GITHUB_ENV
+            echo "SKIP_PRIVATE_SOLVER_TEST=ON" >> $GITHUB_ENV
+          fi
+        env:
+          GITLAB_TOKEN : ${{ secrets.GITLAB_TOKEN }}
+      - name: Install ROS
+        if: matrix.standalone == 'catkin'
+        run: |
+          set -e
+          set -x
+          sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+          wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
+          sudo apt-get update -qq
+          sudo apt-get install -qq ros-${ROS_DISTRO}-ros-base ${PYTHON_PACKAGE_PREFIX}-catkin-tools ${PYTHON_PACKAGE_PREFIX}-rosdep doxygen graphviz
+      - name: Setup catkin workspace
+        if: matrix.standalone == 'catkin'
+        run: |
+          set -e
+          set -x
+          mkdir -p ${GITHUB_WORKSPACE}/catkin_ws/src/
+          cd ${GITHUB_WORKSPACE}/catkin_ws
+          set +x
+          . /opt/ros/${ROS_DISTRO}/setup.bash
+          set -x
+          catkin init
+          catkin build --limit-status-rate 0.1
+      - name: Checkout repository code
+        if: matrix.standalone == 'catkin'
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          path: catkin_ws/src/QpSolverCollection
+      - name: Checkout repository code
+        if: matrix.standalone == 'standalone'
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Rosdep install
+        if: matrix.standalone == 'catkin'
+        run: |
+          set -e
+          set -x
+          cd ${GITHUB_WORKSPACE}/catkin_ws
+          set +x
+          . devel/setup.bash
+          set -x
+          sudo rosdep init
+          rosdep update
+          rosdep install -y -r --from-paths src --ignore-src
+      - name: Install solvers via apt
+        if: matrix.solvers-from-source == 'SolversFromAPT'
+        uses: jrl-umi3218/github-actions/install-dependencies@master
+        with:
+          build-type: ${{ matrix.build-type }}
+          ubuntu: |
+            apt-mirrors:
+              mc-rtc:
+                cloudsmith: mc-rtc/head
+            apt: libmetis-dev libeigen3-dev libgtest-dev graphviz doxygen libeigen-qld-dev libeigen-quadprog-dev libjrl-qp-dev libqpoases-dev libosqp-eigen-dev libnasoq-dev libhpipm-dev libproxsuite-dev libqpmad-dev
+      - name: Install solvers from source
+        if: matrix.solvers-from-source == 'SolversFromSource'
+        uses: jrl-umi3218/github-actions/install-dependencies@master
+        with:
+          build-type: ${{ matrix.build-type }}
+          ubuntu: |
+            apt: libmetis-dev libeigen3-dev libgtest-dev graphviz doxygen
+          github: |
+            - path: jrl-umi3218/eigen-qld
+              options: -DBUILD_TESTING=OFF -DPYTHON_BINDING=OFF -DINSTALL_DOCUMENTATION=OFF
+            - path: jrl-umi3218/eigen-quadprog
+              options: -DBUILD_TESTING=OFF -DINSTALL_DOCUMENTATION=OFF
+            - path: jrl-umi3218/jrl-qp
+              options: -DBUILD_TESTING=OFF -DBUILD_BENCHMARKS=OFF -DINSTALL_DOCUMENTATION=OFF
+            - path: coin-or/qpOASES
+              options: -DBUILD_SHARED_LIBS=ON -DQPOASES_BUILD_EXAMPLES=OFF
+            - path: osqp/osqp
+            - path: robotology/osqp-eigen
+            - path: mmurooka/nasoq
+              ref: cmake-install
+              options: -DCMAKE_INSTALL_PREFIX=/usr/local -DNASOQ_BLAS_BACKEND=OpenBLAS -DNASOQ_USE_CLAPACK=ON -DNASOQ_BUILD_CLI=OFF -DNASOQ_BUILD_EXAMPLES=OFF -DNASOQ_BUILD_TESTS=OFF -DNASOQ_BUILD_DOCS=OFF
+            - path: giaf/blasfeo
+              options: -DBUILD_SHARED_LIBS=ON -DTARGET=X64_AUTOMATIC -DBLASFEO_EXAMPLES=OFF
+            - path: giaf/hpipm
+              options: -DBUILD_SHARED_LIBS=ON -DHPIPM_TESTING=OFF
+            - path: Simple-Robotics/proxsuite
+              ref: main
+              options: -DBUILD_TESTING=OFF -DBUILD_WITH_VECTORIZATION_SUPPORT=OFF
+            - path: asherikov/qpmad
+      - name: Install private solvers
+        if: env.ENABLE_PRIVATE_SOLVERS == 'ON'
+        uses: jrl-umi3218/github-actions/install-dependencies@master
+        with:
+          build-type: ${{ matrix.build-type }}
+          github: |
+            - path: git@gite.lirmm.fr:multi-contact/eigen-lssol
+              options: -DBUILD_TESTING=OFF -DPYTHON_BINDING=OFF -DINSTALL_DOCUMENTATION=OFF
+      - name: Catkin build
+        if: matrix.standalone == 'catkin'
+        run: |
+          set -e
+          set -x
+          cd ${GITHUB_WORKSPACE}/catkin_ws
+          set +x
+          . devel/setup.bash
+          set -x
+          catkin build --limit-status-rate 0.1 -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
+          -DDEFAULT_ENABLE_ALL=ON -DENABLE_LSSOL=${{ env.ENABLE_PRIVATE_SOLVERS }} \
+          -DSKIP_PRIVATE_SOLVER_TEST=${{ env.SKIP_PRIVATE_SOLVER_TEST }} -DFORCE_ALL_SOLVER_TEST=ON -DINSTALL_DOCUMENTATION=ON
+      - name: Run tests
+        if: matrix.standalone == 'catkin'
+        run: |
+          set -e
+          set -x
+          cd ${GITHUB_WORKSPACE}/catkin_ws
+          set +x
+          . devel/setup.bash
+          set -x
+          catkin build --limit-status-rate 0.1 --catkin-make-args run_tests -- qp_solver_collection --no-deps
+          catkin_test_results --verbose --all build
+      - name: Build and test
+        if: matrix.standalone == 'standalone'
+        uses: jrl-umi3218/github-actions/build-cmake-project@master
+        with:
+          build-type: ${{ matrix.build-type }}
+          options: -DDEFAULT_ENABLE_ALL=ON -DENABLE_LSSOL=${{ env.ENABLE_PRIVATE_SOLVERS }} -DSKIP_PRIVATE_SOLVER_TEST=${{ env.SKIP_PRIVATE_SOLVER_TEST }} -DFORCE_ALL_SOLVER_TEST=ON -DINSTALL_DOCUMENTATION=ON
+      - name: Upload documentation
+        # Only run for one configuration and on origin master branch
+        if: matrix.os == 'ubuntu-20.04' && matrix.build-type == 'RelWithDebInfo' && matrix.standalone == 'catkin' && matrix.solvers-from-source == 'SolversFromAPT' && github.repository_owner == 'isri-aist' && github.ref == 'refs/heads/master'
+        run: |
+          set -e
+          set -x
+          cd ${GITHUB_WORKSPACE}/catkin_ws/src/QpSolverCollection
+          git config --global user.name "Masaki Murooka"
+          git config --global user.email "m-murooka@aist.go.jp"
+          git remote set-url origin "https://mmurooka:${{ secrets.CI_TOKEN }}@github.com/isri-aist/QpSolverCollection"
+          git fetch --depth=1 origin gh-pages:gh-pages
+          git checkout --quiet gh-pages
+          rm -rf doxygen/
+          cp -r ${GITHUB_WORKSPACE}/catkin_ws/build/qp_solver_collection/doc/html/ doxygen
+          git add doxygen
+          git_status=`git status -s`
+          if test -n "$git_status"; then
+            git commit --quiet -m "Update Doxygen HTML files from commit ${{ github.sha }}"
+            git push origin gh-pages
+          else
+            echo "Github pages documentation is already up-to-date."
+          fi

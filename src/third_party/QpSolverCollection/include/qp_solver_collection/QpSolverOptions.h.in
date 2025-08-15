@@ -1,0 +1,17 @@
+/* Author: Masaki Murooka */
+
+#pragma once
+
+namespace QpSolverCollection
+{
+#cmakedefine01 ENABLE_QLD
+#cmakedefine01 ENABLE_QUADPROG
+#cmakedefine01 ENABLE_LSSOL
+#cmakedefine01 ENABLE_JRLQP
+#cmakedefine01 ENABLE_QPOASES
+#cmakedefine01 ENABLE_OSQP
+#cmakedefine01 ENABLE_NASOQ
+#cmakedefine01 ENABLE_HPIPM
+#cmakedefine01 ENABLE_PROXQP
+#cmakedefine01 ENABLE_QPMAD
+} // namespace QpSolverCollection

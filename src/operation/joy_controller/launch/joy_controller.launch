@@ -1,0 +1,14 @@
+<launch>
+
+  <arg name="joy_param_path" default="$(find joy_controller)/config/joy.yaml" />
+  <arg name="joy_controller_param_path" default="$(find joy_controller)/config/joy_controller.yaml" />
+
+  <node name="joy_node" pkg="joy" type="joy_node" >
+    <rosparam command="load" file="$(arg joy_param_path)" />
+  </node>
+
+  <node pkg="joy_controller" type="joy_controller_node" name="joy_controller" output="screen">
+    <rosparam command="load" file="$(arg joy_controller_param_path)" />
+  </node>
+
+</launch>

@@ -1,0 +1,23 @@
+<package format="2">
+  <name>qp_solver_collection</name>
+  <version>0.1.0</version>
+  <description>
+    Unified interface for quadratic programming solvers
+  </description>
+  <maintainer email="m-murooka@aist.go.jp">Masaki Murooka</maintainer>
+  <license>BSD</license>
+
+  <url>http://ros.org/wiki/qp_solver_collection</url>
+  <author>Masaki Murooka</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>roscpp</depend>
+
+  <build_depend>eigen</build_depend>
+
+  <test_depend>rosunit</test_depend>
+
+  <doc_depend>doxygen</doc_depend>
+  <doc_depend>graphviz</doc_depend>
+</package>

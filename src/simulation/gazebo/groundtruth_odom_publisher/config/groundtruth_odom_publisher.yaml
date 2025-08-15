@@ -1,0 +1,3 @@
+base_frame: base_link
+odom_frame: odom
+groundtruth_topic: /groundtruth_odom

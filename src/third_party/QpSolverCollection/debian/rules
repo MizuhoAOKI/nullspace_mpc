@@ -1,0 +1,18 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+export BUILD_TESTING:=ON
+export VERSION_CODENAME:=$(shell . /etc/os-release && echo $$VERSION_CODENAME)
+# We disable tests in Bionic because gtest does not come in a usable way
+ifeq (${VERSION_CODENAME}, bionic)
+	export BUILD_TESTING:=OFF
+endif
+
+%:
+	dh $@ --parallel
+
+override_dh_auto_configure:
+	dh_auto_configure -- -DDEFAULT_ENABLE_ALL=ON -DENABLE_LSSOL=OFF -DSKIP_PRIVATE_SOLVER_TEST=ON -DFORCE_ALL_SOLVER_TEST=ON -DINSTALL_DOCUMENTATION=ON -DBUILD_TESTING:BOOL=${BUILD_TESTING}

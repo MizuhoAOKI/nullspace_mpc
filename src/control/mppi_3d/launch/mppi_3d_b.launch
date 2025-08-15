@@ -1,0 +1,7 @@
+<launch>
+    <arg name="mppi_3d_param_path" default="$(find mppi_3d)/config/mppi_3d_b.yaml" />
+
+    <node pkg="mppi_3d" type="mppi_3d_node" name="mppi_3d" output="screen">
+        <rosparam command="load" file="$(arg mppi_3d_param_path)" />
+    </node>
+</launch>

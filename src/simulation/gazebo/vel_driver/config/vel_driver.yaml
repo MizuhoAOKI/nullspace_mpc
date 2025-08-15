@@ -1,0 +1,19 @@
+# subscribing topic names
+control_cmd_vel_topic: /cmd_vel
+
+# publishing topic names
+front_left_steer_cmd_topic: /fwids/front_left_steer_rad/command
+front_right_steer_cmd_topic: /fwids/front_right_steer_rad/command
+rear_left_steer_cmd_topic: /fwids/rear_left_steer_rad/command
+rear_right_steer_cmd_topic: /fwids/rear_right_steer_rad/command
+front_left_rotor_cmd_topic: /fwids/front_left_rotor_radpersec/command
+front_right_rotor_cmd_topic: /fwids/front_right_rotor_radpersec/command
+rear_left_rotor_cmd_topic: /fwids/rear_left_rotor_radpersec/command
+rear_right_rotor_cmd_topic: /fwids/rear_right_rotor_radpersec/command
+
+# vehicle parameters
+l_f: 0.5 # front axle to center of mass [m]
+l_r: 0.5 # rear axle to center of mass [m]
+d_l: 0.5 # left wheel to center of mass [m]
+d_r: 0.5 # right wheel to center of mass [m]
+tire_radius: 0.2 # wheel radius [m]

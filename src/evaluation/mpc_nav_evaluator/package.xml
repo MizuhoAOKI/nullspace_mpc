@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>mpc_nav_evaluator</name>
+  <version>0.0.0</version>
+  <description>The mpc_nav_evaluator package</description>
+
+  <!-- maintainer -->
+  <maintainer email="mizuhoaoki1998@gmail.com">Mizuho Aoki</maintainer>
+
+  <!-- license -->
+  <license>MIT</license>
+
+  <!-- dependencies -->
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>nav_msgs</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>tf2</build_depend>
+  <build_depend>tf2_geometry_msgs</build_depend>
+  <build_depend>tf2_ros</build_depend>
+  <build_export_depend>geometry_msgs</build_export_depend>
+  <build_export_depend>nav_msgs</build_export_depend>
+  <build_export_depend>rospy</build_export_depend>
+  <build_export_depend>std_msgs</build_export_depend>
+  <build_export_depend>tf2</build_export_depend>
+  <build_export_depend>tf2_geometry_msgs</build_export_depend>
+  <build_export_depend>tf2_ros</build_export_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>tf2</exec_depend>
+  <exec_depend>tf2_geometry_msgs</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+
+</package>

@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>reference_costmap_generator</name>
+  <version>0.0.0</version>
+  <description>The reference_costmap_generator package</description>
+
+  <!-- maintainer -->
+  <maintainer email="mizuhoaoki1998@gmail.com">Mizuho Aoki</maintainer>
+
+  <!-- license -->
+  <license>MIT</license>
+
+  <!-- dependencies -->
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>grid_map_core</build_depend>
+  <build_depend>grid_map_filters</build_depend>
+  <build_depend>grid_map_loader</build_depend>
+  <build_depend>grid_map_msgs</build_depend>
+  <build_depend>grid_map_ros</build_depend>
+  <build_depend>grid_map_rviz_plugin</build_depend>
+  <build_depend>grid_map_visualization</build_depend>
+  <build_depend>nav_msgs</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>tf2</build_depend>
+  <build_depend>tf2_geometry_msgs</build_depend>
+  <build_depend>tf2_ros</build_depend>
+  <build_depend>libomp-dev</build_depend>
+  <build_export_depend>grid_map_core</build_export_depend>
+  <build_export_depend>grid_map_filters</build_export_depend>
+  <build_export_depend>grid_map_loader</build_export_depend>
+  <build_export_depend>grid_map_msgs</build_export_depend>
+  <build_export_depend>grid_map_ros</build_export_depend>
+  <build_export_depend>grid_map_rviz_plugin</build_export_depend>
+  <build_export_depend>grid_map_visualization</build_export_depend>
+  <build_export_depend>nav_msgs</build_export_depend>
+  <build_export_depend>roscpp</build_export_depend>
+  <build_export_depend>tf2</build_export_depend>
+  <build_export_depend>tf2_geometry_msgs</build_export_depend>
+  <build_export_depend>tf2_ros</build_export_depend>
+  <exec_depend>grid_map_core</exec_depend>
+  <exec_depend>grid_map_filters</exec_depend>
+  <exec_depend>grid_map_loader</exec_depend>
+  <exec_depend>grid_map_msgs</exec_depend>
+  <exec_depend>grid_map_ros</exec_depend>
+  <exec_depend>grid_map_rviz_plugin</exec_depend>
+  <exec_depend>grid_map_visualization</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>tf2</exec_depend>
+  <exec_depend>tf2_geometry_msgs</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+
+</package>

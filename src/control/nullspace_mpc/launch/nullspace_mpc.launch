@@ -1,0 +1,7 @@
+<launch>
+    <arg name="nullspace_mpc_param_path" default="$(find nullspace_mpc)/config/nullspace_mpc.yaml" />
+
+    <node pkg="nullspace_mpc" type="nullspace_mpc_node" name="nullspace_mpc" output="screen">
+        <rosparam command="load" file="$(arg nullspace_mpc_param_path)" />
+    </node>
+</launch>

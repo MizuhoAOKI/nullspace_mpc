@@ -1,0 +1,12 @@
+obstacle_range: 10.0
+raytrace_range: 15.0
+
+# fwids vehicle size
+robot_radius: 0.6
+
+inflation_radius: 0.65
+cost_scaling_factor: 1.0
+
+map_type: costmap
+observation_sources: scan
+scan: {sensor_frame: laser_link, data_type: LaserScan, topic: /scan, marking: true, clearing: true}

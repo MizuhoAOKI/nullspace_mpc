@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>mppi_3d</name>
+  <version>0.0.0</version>
+  <description>The mppi_3d package</description>
+
+  <!-- maintainer -->
+  <maintainer email="mizuhoaoki1998@gmail.com">Mizuho Aoki</maintainer>
+
+  <!-- license -->
+  <license>MIT</license>
+
+  <!-- dependencies -->
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>visualization_msgs</build_depend>
+  <build_depend>jsk_rviz_plugins</build_depend>
+  <build_depend>nav_msgs</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>tf2</build_depend>
+  <build_depend>tf2_geometry_msgs</build_depend>
+  <build_depend>tf2_ros</build_depend>
+  <build_depend>grid_map</build_depend>
+  <build_depend>grid_map_ros</build_depend>
+  <build_depend>grid_map_msgs</build_depend>
+  <build_depend>grid_map_rviz_plugin</build_depend>
+  <build_depend>grid_map_visualization</build_depend>
+  <build_depend>mpc_eval_msgs</build_depend>
+
+  <build_export_depend>geometry_msgs</build_export_depend>
+  <build_export_depend>visualization_msgs</build_export_depend>
+  <build_export_depend>jsk_rviz_plugins</build_export_depend>
+  <build_export_depend>nav_msgs</build_export_depend>
+  <build_export_depend>roscpp</build_export_depend>
+  <build_export_depend>tf2</build_export_depend>
+  <build_export_depend>tf2_geometry_msgs</build_export_depend>
+  <build_export_depend>tf2_ros</build_export_depend>
+  <build_export_depend>grid_map</build_export_depend>
+  <build_export_depend>grid_map_ros</build_export_depend>
+  <build_export_depend>grid_map_msgs</build_export_depend>
+  <build_export_depend>grid_map_rviz_plugin</build_export_depend>
+  <build_export_depend>grid_map_visualization</build_export_depend>
+
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>visualization_msgs</exec_depend>
+  <exec_depend>jsk_rviz_plugins</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>tf2</exec_depend>
+  <exec_depend>tf2_geometry_msgs</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>grid_map</exec_depend>
+  <exec_depend>grid_map_ros</exec_depend>
+  <exec_depend>grid_map_msgs</exec_depend>
+  <exec_depend>grid_map_rviz_plugin</exec_depend>
+  <exec_depend>grid_map_visualization</exec_depend>
+
+  <!-- dependencies of navigation stack -->
+  <build_depend>bullet</build_depend>
+  <build_depend>sdl</build_depend>
+  <build_depend>sdl-image</build_depend>
+  <build_depend>geometry2</build_depend>
+  <build_depend>navigation</build_depend>
+  <build_export_depend>bullet</build_export_depend>
+  <build_export_depend>sdl</build_export_depend>
+  <build_export_depend>sdl-image</build_export_depend>
+  <build_export_depend>geometry2</build_export_depend>
+  <build_export_depend>navigation</build_export_depend>
+  <exec_depend>bullet</exec_depend>
+  <exec_depend>sdl</exec_depend>
+  <exec_depend>sdl-image</exec_depend>
+  <exec_depend>geometry2</exec_depend>
+  <exec_depend>navigation</exec_depend>
+  <exec_depend>gmapping</exec_depend>
+  <exec_depend>teb_local_planner</exec_depend>
+
+</package>

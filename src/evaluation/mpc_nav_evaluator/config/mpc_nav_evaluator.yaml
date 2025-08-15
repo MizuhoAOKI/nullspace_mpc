@@ -1,0 +1,4 @@
+mpc_eval_topic: /mpc/eval_info
+goal_pose_topic: /move_base_simple/goal
+initial_pose_x: 0.0
+initial_pose_y: 0.0

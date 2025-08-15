@@ -1,0 +1,7 @@
+<launch>
+    <arg name="mppi_h_param_path" default="$(find mppi_h)/config/mppi_h.yaml" />
+
+    <node pkg="mppi_h" type="mppi_h_node" name="mppi_h" output="screen">
+        <rosparam command="load" file="$(arg mppi_h_param_path)" />
+    </node>
+</launch>

@@ -1,0 +1,17 @@
+goals:
+- goal_x: 2.5
+  goal_y: 2.5
+- goal_x: -2.5
+  goal_y: 2.5
+- goal_x: -2.5
+  goal_y: -2.5
+- goal_x: 2.5
+  goal_y: -5.0
+- goal_x: 2.5
+  goal_y: 2.5
+- goal_x: -2.5
+  goal_y: 2.5
+- goal_x: -2.5
+  goal_y: -2.5
+- goal_x: 2.5
+  goal_y: -5.0

@@ -1,0 +1,2 @@
+# joystick 
+dev : /dev/input/js0

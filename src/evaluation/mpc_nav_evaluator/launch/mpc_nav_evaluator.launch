@@ -1,0 +1,13 @@
+<launch>
+    <!-- get arguments from the parent launch file -->
+    <arg name="scenario_config_path" default="file_not_specified"/>
+    <arg name="eval_result_dir" default="file_not_specified"/>
+
+    <arg name="mpc_nav_evaluator_param_path" default="$(find mpc_nav_evaluator)/config/mpc_nav_evaluator.yaml" />
+    <node pkg="mpc_nav_evaluator" type="mpc_nav_evaluator.py" name="mpc_nav_evaluator" output="screen">
+        <rosparam command="load" file="$(arg mpc_nav_evaluator_param_path)" />
+        <param name="scenario_config_path" value="$(arg scenario_config_path)" />
+        <param name="eval_result_dir" value="$(arg eval_result_dir)" />
+    </node>
+
+</launch>

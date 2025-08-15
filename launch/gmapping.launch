@@ -1,0 +1,37 @@
+<launch>
+
+  <!-- often changed arguments -->
+  <arg name="gazebo_world_name" default="maze" /> <!-- empty, empty_garden, cylinder_garden, maze -->
+  <arg name="joy_operation" default="true" />
+
+  <!-- arguments -->
+  <arg name="workspace" default="$(env HOME)/nullspace_mpc" />
+  <arg name="rvizconfig" default="$(arg workspace)/data/rviz/gmapping.rviz" />
+  <arg name="open_rviz" default="true"/>
+  <arg name="set_base_frame" default="base_link"/>
+  <arg name="set_odom_frame" default="odom"/>
+  <arg name="set_map_frame"  default="map"/>
+  <rosparam param="/use_sim_time">true</rosparam> <!-- set use_sim_time true to syncronize time with gazebo -->
+
+  <!-- launch gazebo world -->
+  <include file="$(arg workspace)/launch/gazebo_world.launch">
+    <arg name="gazebo_world_name" value="$(arg gazebo_world_name)" />
+    <arg name="use_joystick" value="$(arg joy_operation)" />
+    <arg name="use_vel_driver" value="true" />
+    <arg name="open_rviz" value="false" />
+  </include>
+
+  <!-- gmapping -->
+  <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen">
+    <rosparam command="load" file="$(arg workspace)/config/gmapping.yaml" />
+    <remap from="scan" to="/laser_link/scan" />
+    <param name="base_frame" value="$(arg set_base_frame)"/>
+    <param name="odom_frame" value="$(arg set_odom_frame)"/>
+    <param name="map_frame"  value="$(arg set_map_frame)"/>
+  </node>
+
+  <!-- rviz -->
+  <group if="$(arg open_rviz)"> 
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+  </group>
+</launch>

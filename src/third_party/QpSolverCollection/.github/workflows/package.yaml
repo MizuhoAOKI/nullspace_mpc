@@ -1,0 +1,27 @@
+name: Package QpSolverCollection
+on:
+  repository_dispatch:
+    types:
+    - package-master
+    - package-release
+  pull_request:
+    branches:
+    - "**"
+  push:
+    paths-ignore:
+    - doc/**
+    - README.md
+    - ".github/workflows/ci.yaml"
+    branches:
+    - "**"
+    tags:
+    - v*
+jobs:
+  package:
+    uses: jrl-umi3218/github-actions/.github/workflows/package-project.yml@master
+    with:
+      deps: '["isri-aist/ForceControlCollection"]'
+      main-repo: isri-aist/QpSolverCollection
+    secrets:
+      CLOUDSMITH_API_KEY: ${{ secrets.CLOUDSMITH_API_KEY }}
+      GH_TOKEN: ${{ secrets.GH_PAGES_TOKEN }}

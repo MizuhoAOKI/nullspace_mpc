@@ -1,0 +1,21 @@
+# frequently used parameters
+total_number_of_episodes: 10 # [episode]
+eval_name: "basic 10 scenarios selected randomly, running large space"
+result_dir: "~/nullspace_mpc/result"
+
+# general params
+maximum_time_per_single_episode: 300.0 # [s]
+cooling_time_between_episodes: 3.0 # [s]
+
+# evaluation scenarios
+scenarios:
+  - ~/nullspace_mpc/data/eval_ten/large/episode_0000.yaml
+  - ~/nullspace_mpc/data/eval_ten/large/episode_0001.yaml
+  - ~/nullspace_mpc/data/eval_ten/large/episode_0002.yaml
+  - ~/nullspace_mpc/data/eval_ten/large/episode_0003.yaml
+  - ~/nullspace_mpc/data/eval_ten/large/episode_0004.yaml
+  - ~/nullspace_mpc/data/eval_ten/large/episode_0005.yaml
+  - ~/nullspace_mpc/data/eval_ten/large/episode_0006.yaml
+  - ~/nullspace_mpc/data/eval_ten/large/episode_0007.yaml
+  - ~/nullspace_mpc/data/eval_ten/large/episode_0008.yaml
+  - ~/nullspace_mpc/data/eval_ten/large/episode_0009.yaml

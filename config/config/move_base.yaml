@@ -1,0 +1,8 @@
+shutdown_costmaps: false
+controller_frequency: 2.0 # [Hz]
+planner_patience: 5.0
+controller_patience: 5.0
+conservative_reset_dist: 3.0
+planner_frequency: 0.5 # [Hz]
+oscillation_timeout: 86400 # 24 h
+oscillation_distance: 0.2

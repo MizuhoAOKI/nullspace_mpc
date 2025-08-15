@@ -1,0 +1,7 @@
+<launch>
+    <arg name="groundtruth_odom_publisher_param_path" default="$(find groundtruth_odom_publisher)/config/groundtruth_odom_publisher.yaml" />
+
+    <node pkg="groundtruth_odom_publisher" type="groundtruth_odom_publisher_node" name="groundtruth_odom_publisher" output="screen">
+        <rosparam command="load" file="$(arg groundtruth_odom_publisher_param_path)" />
+    </node>
+</launch>

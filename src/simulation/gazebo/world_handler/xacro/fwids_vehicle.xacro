@@ -1,0 +1,300 @@
+<?xml version="1.0"?>
+<!-- 4WIDS vehicle model -->
+
+<!-- Reference : https://qiita.com/Yuya-Shimizu/items/4bc097eafb870ba78432 -->
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="four_wheel_independent_drive_and_steering_vehicle">
+
+    <!-- # set parameters -->
+    <xacro:property name="body_mass" value="50.0" />
+    <xacro:property name="body_thickness" value="0.05" />
+    <xacro:property name="tire_mass" value="5.0" />
+    <xacro:property name="tire_radius" value="0.2" />
+    <xacro:property name="tire_thickness" value="0.05" />
+    <xacro:property name="l_f" value="0.5" />
+    <xacro:property name="l_r" value="0.5" />
+    <xacro:property name="d_l" value="0.5" />
+    <xacro:property name="d_r" value="0.5" />
+
+    <!-- # define macros -->
+
+    <!-- ## define material colors for URDF -->
+    <material name="black">  <color rgba="0.2 0.2 0.2 1.0"/> </material>
+    <material name="white">  <color rgba="1.0 1.0 1.0 1.0"/> </material>
+    <material name="red">    <color rgba="1.0 0.0 0.0 1.0"/> </material>
+    <material name="green">  <color rgba="0.0 1.0 0.0 1.0"/> </material>
+    <material name="blue">   <color rgba="0.0 0.0 1.0 1.0"/> </material>
+    <material name="yellow"> <color rgba="1.0 1.0 0.0 1.0"/> </material>
+    <material name="cyan">   <color rgba="0.0 1.0 1.0 1.0"/> </material>
+    <material name="purple"> <color rgba="1.0 0.0 1.0 1.0"/> </material>
+    <material name="gray_a"> <color rgba="0.5 0.5 0.5 0.6"/> </material>
+
+    <!-- ## macro for gazebo material settings -->
+    <xacro:macro name="gazebo_material" params="ref mu *color">
+        <gazebo reference="${ref}">
+            <mu1>${mu}</mu1>
+            <mu2>${mu}</mu2>
+        <xacro:insert_block name="color" />
+        </gazebo>
+    </xacro:macro>
+
+    <!-- ## macro for generate link -->
+    <xacro:macro name="link_generator" params="name mass color_name *shape *inertia">
+        <link name="${name}">
+            <visual>
+                <geometry>
+                    <xacro:insert_block name="shape" />
+                </geometry>
+                <material name="${color_name}"/>
+            </visual>
+            <collision>
+                <geometry>
+                    <xacro:insert_block name="shape" />
+                </geometry>
+            </collision>
+            <inertial>
+                <mass value="${mass}"/>
+                        <xacro:insert_block name="inertia" />
+            </inertial>
+        </link>
+    </xacro:macro>
+
+    <!-- ## macro for setting fixed joints -->
+    <xacro:macro name="fixed_joint" params="name parent child *origin">
+        <joint name="${name}" type="fixed">
+        <xacro:insert_block name="origin" />
+        <parent link="${parent}"/>
+        <child link="${child}"/>
+        </joint>
+    </xacro:macro>
+
+    <!-- ## macro for setting continuous joints -->
+    <xacro:macro name="continuous_joint" params="name parent child *origin *axis">
+        <joint name="${name}_joint" type="continuous">
+        <xacro:insert_block name="origin" />
+        <parent link="${parent}"/>
+        <child link="${child}"/>
+        <xacro:insert_block name="axis" />
+        </joint>
+    </xacro:macro>
+
+    <xacro:macro name="steer_joint" params="name parent child *origin *axis">
+        <joint name="${name}_joint" type="continuous">
+        <xacro:insert_block name="origin" />
+        <parent link="${parent}"/>
+        <child link="${child}"/>
+        <xacro:insert_block name="axis" />
+        </joint>
+
+        <transmission name="${name}_trans">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="${name}_joint">
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="${name}_motor">
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+            <mechanicalReduction>1</mechanicalReduction>
+        </actuator>
+        </transmission>
+    </xacro:macro>
+
+    <xacro:macro name="rotor_joint" params="name parent child *origin *axis">
+        <joint name="${name}_joint" type="continuous">
+        <xacro:insert_block name="origin" />
+        <parent link="${parent}"/>
+        <child link="${child}"/>
+        <xacro:insert_block name="axis" />
+        <dynamics damping="0.1"/>
+        </joint>
+
+        <transmission name="${name}_trans">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="${name}_joint">
+            <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="${name}_motor">
+            <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+            <mechanicalReduction>1</mechanicalReduction>
+        </actuator>
+        </transmission>
+    </xacro:macro>
+
+    <xacro:macro name="sus_joint" params="name parent child *origin *axis">
+        <joint name="${name}_joint" type="prismatic">
+        <xacro:insert_block name="origin" />
+        <parent link="${parent}"/>
+        <child link="${child}"/>
+        <limit lower="-0.02" upper="0.02" effort="100" velocity="1.0" />
+        <xacro:insert_block name="axis" />
+        <dynamics damping="0.1"/>
+        </joint>
+        <transmission name="${name}_trans">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="${name}_joint">
+            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="${name}_motor">
+            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <mechanismReduction>1</mechanismReduction>
+        </actuator>
+        </transmission>
+        <gazebo reference="${name}_joint">
+        <kp>50000</kp>
+        <kd>500</kd>
+        </gazebo>
+    </xacro:macro>
+
+    <!-- ## macro for define a wheel unit -->
+    <xacro:macro name="wheel_unit" params="name parent x_pos y_pos z_pos">
+
+    <!-- ### wheel base link -->
+	<xacro:link_generator name="${name}_wheel_base_link" mass="0.01" color_name="black">
+        <cylinder radius="0.025" length="0.025" />
+        <inertia ixx="0.01" iyy="0.01" izz="0.01" ixy="0" ixz="0" iyz="0"/>
+	</xacro:link_generator>
+    <xacro:gazebo_material ref="${name}_wheel_base_link" mu="0.8">
+		<material>Gazebo/Black</material>
+    </xacro:gazebo_material>
+	<xacro:fixed_joint name="${name}_wheel_joint" parent="${parent}" child="${name}_wheel_base_link">
+        <origin xyz="${x_pos} ${y_pos} ${z_pos}" rpy="0 0 0"/>
+	</xacro:fixed_joint>
+
+    <!-- ### wheel suspension -->
+	<xacro:link_generator name="${name}_wheel_suspension" mass="0.01" color_name="red">
+		<cylinder radius="0.01" length="0.1"/>
+        <inertia ixx="0.01" iyy="0.01" izz="0.01" ixy="0" ixz="0" iyz="0"/>
+	</xacro:link_generator>
+    <xacro:gazebo_material ref="${name}_wheel_suspension" mu="0.8">
+		<material>Gazebo/Red</material>
+    </xacro:gazebo_material>
+    <xacro:sus_joint name="${name}_wheel_suspension" parent="${name}_wheel_base_link" child="${name}_wheel_suspension">
+        <origin xyz="0.0 0.0 -0.1" rpy="0 0 0"/>
+        <axis xyz="0 0 1"/>
+    </xacro:sus_joint>
+
+    <!-- ### wheel steering -->
+	<xacro:link_generator name="${name}_wheel_steer" mass="0.01" color_name="gray_a">
+		<cylinder radius="${tire_radius/2.0}" length="${tire_thickness/2.0}"/>
+        <inertia ixx="0.01" iyy="0.01" izz="0.01" ixy="0" ixz="0" iyz="0"/>
+	</xacro:link_generator>
+    <xacro:gazebo_material ref="${name}_wheel_steer" mu="0.8">
+		<material>Gazebo/GreyTransparent</material>
+    </xacro:gazebo_material>
+	<xacro:steer_joint name="${name}_wheel_steer" parent="${name}_wheel_suspension" child="${name}_wheel_steer">
+        <origin xyz="0.0 0.0 -0.1" rpy="0 0 0"/>
+        <axis xyz="0 0 1"/>
+	</xacro:steer_joint>
+
+    <!-- ### wheel rotor -->
+	<xacro:link_generator name="${name}_wheel_rotor" mass="${tire_mass}" color_name="black">
+		<cylinder radius="${tire_radius}" length="${tire_thickness}"/>
+        <inertia ixx="0.0029167" iyy="0.0029167" izz="0.0056250" ixy="0" ixz="0" iyz="0"/>
+	</xacro:link_generator>
+    <xacro:gazebo_material ref="${name}_wheel_rotor" mu="0.8">
+		<material>Gazebo/DarkGrey</material>
+    </xacro:gazebo_material>
+	<xacro:rotor_joint name="${name}_wheel_rotor" parent="${name}_wheel_steer" child="${name}_wheel_rotor">
+        <origin xyz="0 0 ${-tire_radius-0.025}" rpy="-1.57 0 0"/>
+        <axis xyz="0 0 1"/>
+	</xacro:rotor_joint>
+
+    </xacro:macro>
+
+    <!-- # generate links -->
+
+    <!-- ## base_link -->
+    <link name="base_link" />
+
+    <!-- ## vehicle body link -->
+	<xacro:link_generator name="body" mass="${body_mass}" color_name="gray_a">
+        <cylinder radius="${(l_f + l_r) * 0.5}" length="${body_thickness}" />
+        <inertia ixx="0.0118750" iyy="0.0118750" izz="0.0200000" ixy="0" ixz="0" iyz="0"/>
+	</xacro:link_generator>
+    <xacro:gazebo_material ref="body" mu="0.8">
+		<material>Gazebo/GreyTransparent</material>
+    </xacro:gazebo_material>
+
+    <!-- ## 2d lidar link -->
+	<xacro:link_generator name="laser_link" mass="0.0" color_name="blue">
+        <cylinder radius="0.025" length="0.025" />
+        <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0"/>
+	</xacro:link_generator>
+    <xacro:gazebo_material ref="laser_link" mu="0.8">
+		<material>Gazebo/Blue</material>
+    </xacro:gazebo_material>
+
+    <!-- # generate joints -->
+
+    <!-- ## vehicle body joint -->
+	<xacro:fixed_joint name="base_joint" parent="base_link" child="body">
+        <origin xyz="0 0 0.15" rpy="0 0 0"/>
+	</xacro:fixed_joint>
+
+    <!-- ## 2d lidar joint -->
+	<xacro:fixed_joint name="laser_joint" parent="body" child="laser_link">
+        <origin xyz="${(l_f + l_r) * 0.5 * 0.8} 0 ${body_thickness/2.0 + 0.025}" rpy="0 0 0"/>
+	</xacro:fixed_joint>
+
+    <!-- # generate wheel units -->
+    <xacro:wheel_unit name="front_left"  parent="body" x_pos="${l_f}"  y_pos="${d_l}"  z_pos="0.0" />
+    <xacro:wheel_unit name="front_right" parent="body" x_pos="${l_f}"  y_pos="${-d_l}" z_pos="0.0" />
+    <xacro:wheel_unit name="rear_left"   parent="body" x_pos="${-l_f}" y_pos="${d_l}"  z_pos="0.0" />
+    <xacro:wheel_unit name="rear_right"  parent="body" x_pos="${-l_f}" y_pos="${-d_l}" z_pos="0.0" />
+
+    <!-- # gazebo settings -->
+
+    <!-- ## import plugin "gazebo_ros_control" -->
+    <gazebo>
+        <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+        <robotNamespace>/fwids</robotNamespace>
+        </plugin>
+    </gazebo>
+
+    <!-- ## activate laser -->
+    <gazebo reference="laser_link">
+      <material>Gazebo/Blue</material>
+      <sensor type="ray" name="laser">
+        <pose>0 0 0 0 0 0</pose>
+        <visualize>false</visualize>
+        <update_rate>10</update_rate>
+        <ray>
+          <scan>
+            <horizontal>
+              <samples>800</samples>
+              <resolution>1</resolution>
+              <min_angle>${radians(-180)}</min_angle>
+              <max_angle>${radians( 180)}</max_angle>
+            </horizontal>
+          </scan>
+          <range>
+            <min>0.05</min>
+            <max>30.0</max>
+            <resolution>0.01</resolution>
+          </range>
+          <noise>
+            <type>gaussian</type>
+            <mean>0.0</mean>
+            <stddev>0.01</stddev>
+          </noise>
+        </ray>
+        <plugin name="gazebo_ros_lidar_controller" filename="libgazebo_ros_laser.so">
+          <topicName>/laser_link/scan</topicName>
+          <frameName>laser_link</frameName>
+        </plugin>
+      </sensor>
+    </gazebo>
+
+    <!-- ## publish true odometry value -->
+    <gazebo>
+      <plugin name="groundtruth" filename="libgazebo_ros_p3d.so">
+          <alwaysOn>true</alwaysOn>
+          <updateRate>50.0</updateRate>
+          <bodyName>base_link</bodyName>
+          <topicName>groundtruth_odom</topicName>
+          <frameName>map</frameName>
+          <xyzOffsets>0 0 0</xyzOffsets>
+          <rpyOffsets>0 0 0</rpyOffsets>
+          <gaussianNoise>0.02</gaussianNoise>
+      </plugin>
+    </gazebo>
+
+</robot>

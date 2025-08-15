@@ -1,0 +1,58 @@
+# topic names
+## subscribing topics
+odom_topic: /groundtruth_odom
+ref_path_topic: /move_base/NavfnROS/plan
+collision_costmap_topic: /move_base/local_costmap/costmap
+distance_error_map_topic: /distance_error_map
+ref_yaw_map_topic: /ref_yaw_map
+## publishing topics
+control_cmd_vel_topic: /cmd_vel
+mppi_absvel_topic: /mpc/cmd/absvel
+mppi_vx_topic: /mpc/cmd/vx
+mppi_vy_topic: /mpc/cmd/vy
+mppi_omega_topic: /mpc/cmd/omega
+calc_time_topic: /mpc/calc_time
+mppi_overlay_text_topic: /mpc/overlay_text
+mppi_optimal_traj_topic: /mpc/optimal_traj
+mppi_sampled_traj_topic: /mpc/sampled_traj
+mpc_eval_msg_topic: /mpc/eval_info
+
+# navigation params
+navigation:
+  xy_goal_tolerance: 0.5 # [m]
+  yaw_goal_tolerance: 3.14 # [rad]
+
+# target_system params
+target_system:
+  l_f: 0.5 # [m]
+  l_r: 0.5 # [m]
+  d_l: 0.5 # [m]
+  d_r: 0.5 # [m]
+  tire_radius: 0.2 # [m]
+
+# controller params
+controller:
+  name: "mppi_3d_a"
+  control_interval: 0.05 # [s]
+  num_samples: 3000 # number of samples
+  prediction_horizon: 30 # [steps]
+  step_len_sec: 0.033 # [s]
+  param_exploration: 0.1
+  param_lambda: 200.0
+  param_alpha: 0.975
+  sigma: [1.00, 1.00, 0.78] # noise for [vx, vy, omega]
+  reduce_computation: false # if true, noise sampling is done only once and the same noise is used for all processes.
+  weight_cmd_change: [0.0, 0.0, 0.0] # penalty weight for variation of [vx, vy, omega]
+  weight_vehicle_cmd_change: [1.4, 1.4, 1.4, 1.4, 0.1, 0.1, 0.1, 0.1] # penalty weight for variation of [fl_steer, fr_steer, rl_steer, rr_steer, fl_vel, fr_vel, rl_vel, rr_vel]
+  reference_velocity: 2.0 # [m/s]
+  weight_velocity_error: 10.0
+  weight_angular_error: 30.0
+  weight_collision_penalty: 50.0
+  weight_distance_error_penalty: 40.0
+  weight_terminal_state_penalty: 10.0
+  use_sg_filter: true # set true to use Savitzky-Golay filter for smoothing the control input
+  sg_filter_half_window_size: 4 # value in the range of 1 ~ (prediction_horizon - 1) is allowed.
+  sg_filter_poly_order: 6
+# Note: 
+## - to change the velocity limit of the controller, check ../include/mppi_3d/common_type.hpp
+## - to edit the prediction model or the cost function, check ../include/mppi_3d/mppi_3d_setting.hpp

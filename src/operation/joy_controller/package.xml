@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>joy_controller</name>
+  <version>0.0.0</version>
+  <description>The joy_controller package</description>
+
+  <!-- maintainer -->
+  <maintainer email="mizuhoaoki1998@gmail.com">Mizuho Aoki</maintainer>
+
+  <!-- license -->
+  <license>MIT</license>
+
+  <!-- dependencies -->
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_export_depend>roscpp</build_export_depend>
+  <build_export_depend>sensor_msgs</build_export_depend>
+  <build_export_depend>std_msgs</build_export_depend>
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>joy</exec_depend>
+
+</package>

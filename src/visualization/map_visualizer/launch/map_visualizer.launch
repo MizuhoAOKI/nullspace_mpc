@@ -1,0 +1,9 @@
+<launch>
+    <arg name="map_name" default="" />
+    <arg name="map_visualizer_param_path" default="$(find map_visualizer)/config/map_visualizer.yaml" />
+
+    <node pkg="map_visualizer" type="map_visualizer_node" name="map_visualizer" output="screen">
+        <rosparam command="load" file="$(arg map_visualizer_param_path)" />
+        <param name="map_name" value="$(arg map_name)" />
+    </node>
+</launch>

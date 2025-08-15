@@ -1,0 +1,7 @@
+<launch>
+    <arg name="reference_costmap_generator_param_path" default="$(find reference_costmap_generator)/config/reference_costmap_generator.yaml" />
+
+    <node pkg="reference_costmap_generator" type="reference_costmap_generator_node" name="reference_costmap_generator" output="screen">
+        <rosparam command="load" file="$(arg reference_costmap_generator_param_path)" />
+    </node>
+</launch>

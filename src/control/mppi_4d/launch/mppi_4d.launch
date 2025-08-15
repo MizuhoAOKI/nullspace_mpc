@@ -1,0 +1,7 @@
+<launch>
+    <arg name="mppi_4d_param_path" default="$(find mppi_4d)/config/mppi_4d.yaml" />
+
+    <node pkg="mppi_4d" type="mppi_4d_node" name="mppi_4d" output="screen">
+        <rosparam command="load" file="$(arg mppi_4d_param_path)" />
+    </node>
+</launch>

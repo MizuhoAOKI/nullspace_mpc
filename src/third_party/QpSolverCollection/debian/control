@@ -1,0 +1,44 @@
+Source: qpsolvercollection
+Priority: optional
+Maintainer: Pierre Gergondet <pierre.gergondet+ppa@gmail.com>
+Standards-Version: 3.9.5
+Section: libs
+Homepage: https://github.com/isri-aist/QpSolverCollection
+Build-Depends: debhelper (>= 9),
+               pkg-config,
+               cmake,
+               doxygen,
+               graphviz,
+               libboost-chrono-dev,
+               libboost-system-dev,
+               libboost-test-dev,
+               libboost-timer-dev,
+               libeigen3-dev (>= 3.2),
+               libeigen-qld-dev,
+               libeigen-quadprog-dev,
+               libjrl-qp-dev,
+               libqpoases-dev,
+               libosqp-eigen-dev,
+               libnasoq-dev,
+               libhpipm-dev,
+               libproxsuite-dev,
+               libqpmad-dev,
+               libgtest-dev
+
+Package: libqpsolvercollection-dev
+Section: libdevel
+Architecture: any
+Depends: cmake,
+         libeigen3-dev (>= 3.2),
+         libeigen-qld-dev,
+         libeigen-quadprog-dev,
+         libjrl-qp-dev,
+         libqpoases-dev,
+         libosqp-eigen-dev,
+         libnasoq-dev,
+         libhpipm-dev,
+         libproxsuite-dev,
+         libqpmad-dev,
+         ${shlibs:Depends},
+         ${misc:Depends}
+Description: Unified C++ interface for quadratic programming solvers

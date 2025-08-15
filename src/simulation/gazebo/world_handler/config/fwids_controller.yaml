@@ -1,0 +1,52 @@
+# magic spell when you use ros_control
+joint_state_controller:
+  type: joint_state_controller/JointStateController
+  publish_rate: 50 # [Hz]
+
+
+# Front-Left Wheel
+## Steering Control
+front_left_steer_rad:
+  type: position_controllers/JointPositionController
+  joint: front_left_wheel_steer_joint
+
+## Rotor Control
+front_left_rotor_radpersec:
+  type: velocity_controllers/JointVelocityController
+  joint: front_left_wheel_rotor_joint
+
+
+# Front-Right Wheel
+## Steering Control
+front_right_steer_rad:
+  type: position_controllers/JointPositionController
+  joint: front_right_wheel_steer_joint
+
+## Rotor Control
+front_right_rotor_radpersec:
+  type: velocity_controllers/JointVelocityController
+  joint: front_right_wheel_rotor_joint
+
+
+# Rear-Left Wheel
+## Steering Control
+rear_left_steer_rad:
+  type: position_controllers/JointPositionController
+  joint: rear_left_wheel_steer_joint
+
+## Rotor Control
+rear_left_rotor_radpersec:
+  type: velocity_controllers/JointVelocityController
+  joint: rear_left_wheel_rotor_joint
+
+
+# Rear-Right Wheel
+## Steering Control
+rear_right_steer_rad:
+  type: position_controllers/JointPositionController
+  joint: rear_right_wheel_steer_joint
+
+## Rotor Control
+rear_right_rotor_radpersec:
+  type: velocity_controllers/JointVelocityController
+  joint: rear_right_wheel_rotor_joint

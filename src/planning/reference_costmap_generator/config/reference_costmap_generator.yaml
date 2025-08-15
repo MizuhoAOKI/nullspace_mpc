@@ -1,0 +1,5 @@
+ref_path_topic: /move_base/NavfnROS/plan
+map_topic: /map
+distance_error_map_topic: /distance_error_map
+ref_yaw_map_topic: /ref_yaw_map
+map_resolution_scale: 1.0 # ex.) 10.0 means 10 times as rough as the original map resolution
