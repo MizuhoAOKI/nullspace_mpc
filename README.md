@@ -47,6 +47,11 @@ The baseline MPPI controller is based on the following work and is available in 
             curl -fsSL https://get.docker.com -o get-docker.sh
             sudo sh get-docker.sh
             ```
+    - [rocker](https://github.com/osrf/rocker)
+        - For ubuntu users:
+            ```
+            sudo apt-get install python3-rocker
+            ```
 
 2. Clone the project repository.
     ```bash
