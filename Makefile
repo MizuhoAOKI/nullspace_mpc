@@ -25,7 +25,6 @@ install_deps:
 		git \
 		cmake \
 		build-essential \
-		python3-rocker \
 		pkg-config \
 		psmisc \
 		clang-11
