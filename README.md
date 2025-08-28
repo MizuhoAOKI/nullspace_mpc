@@ -176,6 +176,11 @@ Set a **2D Nav Goal** in RViz, and the robot will navigate to the goal.
     cd <path-to-your-workspace>/nullspace_mpc
     make navigation_nullspace_mpc
     ```
+    Try this setting for reduced computational load.
+    ```bash
+    cd <path-to-your-workspace>/nullspace_mpc
+    make navigation_nullspace_mpc_lite
+    ```
 
 - MPPI (Baseline)
     ```bash

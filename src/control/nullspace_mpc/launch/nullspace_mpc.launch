@@ -1,7 +1,21 @@
 <launch>
-    <arg name="nullspace_mpc_param_path" default="$(find nullspace_mpc)/config/nullspace_mpc.yaml" />
 
+  <!-- 'default' or 'lite' -->
+  <arg name="controller_mode" default="default"
+       doc="Mode for nullspace_mpc: choose 'default' or 'lite'"/>
+
+  <!-- if controller_mode is 'default'  -->
+  <group if="$(eval arg('controller_mode') == 'default')">
     <node pkg="nullspace_mpc" type="nullspace_mpc_node" name="nullspace_mpc" output="screen">
-        <rosparam command="load" file="$(arg nullspace_mpc_param_path)" />
+      <rosparam command="load" file="$(find nullspace_mpc)/config/nullspace_mpc.yaml"/>
     </node>
+  </group>
+
+  <!-- if controller_mode is 'lite'  -->
+  <group if="$(eval arg('controller_mode') == 'lite')">
+    <node pkg="nullspace_mpc" type="nullspace_mpc_node" name="nullspace_mpc" output="screen">
+      <rosparam command="load" file="$(find nullspace_mpc)/config/nullspace_mpc_lite.yaml"/>
+    </node>
+  </group>
+
 </launch>

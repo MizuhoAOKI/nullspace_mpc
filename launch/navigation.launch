@@ -24,6 +24,9 @@
   <arg name="do_evaluation" default="true" />
   <arg name="scenario_config_path" default="file_not_specified"/>
   <arg name="eval_result_dir" default="file_not_specified"/>
+  <arg name="controller_mode" default="default" doc="Mode for nullspace_mpc: choose 'default' or 'lite' to adjust performance"/>
+  <arg name="show_gazebo_gui" default="true"/>
+  <arg name="gazebo_headless" default="false"/>
   <rosparam param="/use_sim_time">true</rosparam> <!-- set use_sim_time true to syncronize time with gazebo -->
   <!-- ##### } SETTINGS ##### -->
 
@@ -36,6 +39,8 @@
     <arg name="use_joystick" value="$(arg joy_operation)" />
     <arg name="use_vel_driver" value="false" />
     <arg name="open_rviz" value="false" />
+    <arg name="show_gazebo_gui" value="$(arg show_gazebo_gui)" />
+    <arg name="gazebo_headless" value="$(arg gazebo_headless)" />
   </include>
 
   <!-- map server -->
@@ -67,7 +72,11 @@
 
   <!-- Nullspace MPC -->
   <group if="$(eval local_planner=='nullspace_mpc')">
-      <include file="$(find nullspace_mpc)/launch/nullspace_mpc.launch" />
+
+      <!-- nullspace_mpc with controller_mode to adjust performance -->
+      <include file="$(find nullspace_mpc)/launch/nullspace_mpc.launch">
+          <arg name="controller_mode" value="$(arg controller_mode)"/>
+      </include>
 
       <!-- reference_costmap_generator -->
       <include file="$(find reference_costmap_generator)/launch/reference_costmap_generator.launch" />

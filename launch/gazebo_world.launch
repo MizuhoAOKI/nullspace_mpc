@@ -4,11 +4,15 @@
     <arg name="use_joystick" default="true" />      <!-- Do you use joystick to operate the vehicle? -->
     <arg name="use_vel_driver" default="true" />    <!-- Do you use velocity driver to operate the vehicle? -->
     <arg name="open_rviz" default="true" />         <!-- Do you use rviz? -->
+    <arg name="show_gazebo_gui" default="true"/>
+    <arg name="gazebo_headless" default="false"/>
 
     <!-- launch gazebo world -->
     <include file="$(find world_handler)/launch/launch_gazebo_world_with_fwids.launch">
         <arg name="open_rviz" value="$(arg open_rviz)" />
         <arg name="gazebo_world_name" value="$(arg gazebo_world_name)" />
+        <arg name="show_gazebo_gui" value="$(arg show_gazebo_gui)" />
+        <arg name="gazebo_headless" value="$(arg gazebo_headless)" />
     </include>
 
     <!-- launch groundtruth_odom_publisher -->
