@@ -31,64 +31,18 @@ The baseline MPPI controller is based on the following work and is available in 
 
 ## Setup
 
-### [Option 1] Docker environment
+### [Option 1] Native Environment
+
+Note: This is the recommended setup for optimal performance.
 
 <details>
-<summary>CLICK HERE TO EXPAND</summary>
-
-> [!WARNING]
-> This Docker environment does not use GPU acceleration, which may cause higher CPU load and reduced performance.
-> GPU-enabled support is planned for a future release.
-
-1. Prerequisites
-    - [Docker](https://docs.docker.com/engine/install/ubuntu/)
-        - For Ubuntu users:
-            ```bash
-            curl -fsSL https://get.docker.com -o get-docker.sh
-            sudo sh get-docker.sh
-            ```
-    - [rocker](https://github.com/osrf/rocker)
-        - For ubuntu users:
-            ```
-            sudo apt-get install python3-rocker
-            ```
-
-2. Clone the project repository.
-    ```bash
-    cd <path-to-your-workspace>
-    git clone https://github.com/MizuhoAOKI/nullspace_mpc
-    ```
-
-3. Build the Docker image (first-time setup)
-    ```bash
-    cd <path-to-your-workspace>/nullspace_mpc
-    make setup_docker
-    ```
-
-4. Run the Docker container and start a bash session inside
-    ```bash
-    cd <path-to-your-workspace>/nullspace_mpc
-    make run_docker
-    ```
-
-5. [Inside the docker container] Build the project.
-    ```bash
-    cd ~/nullspace_mpc
-    make build
-    ```
-
-</details>
-
-### [Option 2] Native environment
-
-<details>
-<summary>CLICK HERE TO EXPAND</summary>
+<summary>Click here to expand</summary>
 
 1. Prerequisites
     - [Ubuntu 20.04](https://releases.ubuntu.com/focal/)
     - [ROS Noetic](https://wiki.ros.org/noetic)
 
-2. Clone the project repository.
+2. Clone the repository.
     ```bash
     cd <path-to-your-workspace>
     git clone https://github.com/MizuhoAOKI/nullspace_mpc
@@ -115,6 +69,94 @@ The baseline MPPI controller is based on the following work and is available in 
     ```
 
 </details>  
+
+
+### [Option 2] Docker Environment
+
+#### GPU Accelerated Environment
+
+<details>
+<summary>Click here to expand</summary>
+
+1. Prerequisites
+    - [Docker](https://docs.docker.com/engine/install/ubuntu/)
+        - For Ubuntu users, you can use the convenience script:
+            ```bash
+            curl -fsSL https://get.docker.com -o get-docker.sh
+            sudo sh get-docker.sh
+            ```
+    - [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
+        - This is required to allow Docker containers to access the host's GPU.
+    - NVIDIA GPU & Driver
+        - An NVIDIA GPU and a compatible driver for the base image (nvidia/cuda:12.4.1-devel-ubuntu20.04) are required.
+
+2. Clone the repository.
+    ```bash
+    cd <path-to-your-workspace>
+    git clone https://github.com/MizuhoAOKI/nullspace_mpc
+    ```
+
+3. Build the Docker image (first-time setup).
+    ```bash
+    cd <path-to-your-workspace>/nullspace_mpc
+    make setup_docker_gpu
+    ```
+
+4. Run the Docker container and start a bash session inside.
+    ```bash
+    cd <path-to-your-workspace>/nullspace_mpc
+    make run_docker_gpu
+    ```
+
+5. [Inside the docker container] Build the project.
+    ```bash
+    cd ~/nullspace_mpc
+    make build
+    ```
+
+</details>
+
+#### CPU-Only Environment
+
+<details>
+<summary>Click here to expand</summary>
+
+Warning: This setup runs entirely on the CPU. Performance is significantly lower, and on my test system it was not sufficient for stable control. Use GPU or native setup whenever possible.
+
+1. Prerequisites
+    - [Docker](https://docs.docker.com/engine/install/ubuntu/)
+        - For Ubuntu users:
+            ```bash
+            curl -fsSL https://get.docker.com -o get-docker.sh
+            sudo sh get-docker.sh
+            ```
+
+2. Clone the repository.
+    ```bash
+    cd <path-to-your-workspace>
+    git clone https://github.com/MizuhoAOKI/nullspace_mpc
+    ```
+
+3. Build the Docker image (first-time setup).
+    ```bash
+    cd <path-to-your-workspace>/nullspace_mpc
+    make setup_docker_cpu
+    ```
+
+4. Run the Docker container and start a bash session inside.
+    ```bash
+    cd <path-to-your-workspace>/nullspace_mpc
+    make run_docker_cpu
+    ```
+
+5. [Inside the docker container] Build the project.
+    ```bash
+    cd ~/nullspace_mpc
+    make build
+    ```
+
+</details>
+
 
 ## Usage
 

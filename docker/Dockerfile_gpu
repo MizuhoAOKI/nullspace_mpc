@@ -1,0 +1,108 @@
+# Base Image
+FROM nvidia/cuda:12.4.1-devel-ubuntu20.04
+
+# --- Environment Variables & Build Arguments ---
+ENV NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-all}
+ENV NVIDIA_DRIVER_CAPABILITIES=${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics,video
+ARG UID=1000
+ARG GID=1000
+ARG ROS_DISTRO=noetic
+ENV USERNAME=$ROS_DISTRO
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Asia/Tokyo
+ENV HOME=/home/$USERNAME
+ENV ROS_WS=$HOME/nullspace_mpc
+
+# --- 1. System Setup & Core Package Installation (as root) ---
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        python3-pip \
+        htop \
+        bash-completion \
+        tzdata \
+        mesa-utils \
+        curl \
+        ca-certificates \
+        gnupg \
+        lsb-release && \
+    # Add the ROS repository
+    mkdir -p /etc/apt/sources.list.d && \
+    curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key | gpg --dearmor -o /usr/share/keyrings/ros-keyring.gpg && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-keyring.gpg] http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/ros1-latest.list > /dev/null && \
+    # Set timezone
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && \
+    # Clean up apt cache
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# --- 2. ROS & Related Tools Installation (as root) ---
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        ros-noetic-desktop-full \
+        python3-rosdep \
+        python3-rosinstall-generator \
+        python3-wstool \
+        python3-catkin-tools \
+    && apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# --- 3. Project-Specific System Dependencies (as root) ---
+# Create a temporary directory and copy files while preserving the 'shell' subdirectory.
+RUN mkdir -p /tmp/project_deps
+COPY Makefile /tmp/project_deps/
+COPY shell /tmp/project_deps/shell/
+RUN cd /tmp/project_deps && make install_deps && rm -rf /tmp/project_deps
+
+# --- 4. User Creation ---
+RUN groupadd --gid $GID $USERNAME && \
+    useradd --uid $UID --gid $GID -m -s /bin/bash $USERNAME && \
+    echo "$USERNAME:$USERNAME" | chpasswd && \
+    usermod -aG sudo $USERNAME && \
+    echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$USERNAME && \
+    chmod 0440 /etc/sudoers.d/$USERNAME
+
+# --- 5. Vulkan (GPU) Configuration ---
+COPY config/gpu/nvidia_icd.json /usr/share/vulkan/icd.d/
+
+# --- 6. Switch to Non-Root User & Setup Workspace ---
+USER $USERNAME
+WORKDIR $HOME
+
+# Create workspace and copy project files
+RUN mkdir -p ${ROS_WS}/src
+COPY --chown=$USERNAME:$USERNAME . ${ROS_WS}/
+
+# --- 7. Setup Python and ROS Dependencies (as non-root user) ---
+WORKDIR ${ROS_WS}
+# Upgrade pip and install Python packages
+RUN python3 -m pip install --no-cache-dir --upgrade pip && \
+    python3 -m pip install --no-cache-dir matplotlib numpy
+# Initialize and run rosdep
+RUN sudo rosdep init && \
+    rosdep update --rosdistro ${ROS_DISTRO} && \
+    sudo apt-get update && \
+    /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && \
+                  rosdep install --from-paths src --ignore-src -r -y --rosdistro ${ROS_DISTRO}"
+
+# --- 8. Final Environment Configuration ---
+WORKDIR $HOME
+# Enable color prompt and set up .bashrc
+RUN sed -i "s/#force_color_prompt=yes/force_color_prompt=yes/" $HOME/.bashrc && \
+    echo "" >> $HOME/.bashrc && \
+    echo "# Source ROS environment" >> $HOME/.bashrc && \
+    echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> $HOME/.bashrc && \
+    echo "if [ -f ${ROS_WS}/devel/setup.bash ]; then" >> $HOME/.bashrc && \
+    echo "  source ${ROS_WS}/devel/setup.bash" >> $HOME/.bashrc && \
+    echo "fi" >> $HOME/.bashrc && \
+    echo "# Set custom environment variables" >> $HOME/.bashrc && \
+    echo "export ROS_WORKSPACE=${ROS_WS}" >> $HOME/.bashrc && \
+    echo "# Set GPU-related variables" >> $HOME/.bashrc && \
+    echo "export VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/nvidia_icd.json" >> $HOME/.bashrc && \
+    echo "# Ignore ROS 1 EOL warnings" >> $HOME/.bashrc && \
+    echo "export DISABLE_ROS1_EOL_WARNINGS=1" >> $HOME/.bashrc
+
+# --- 9. Entrypoint ---
+COPY --chown=$USERNAME:$USERNAME docker/ros_entrypoint.sh /usr/local/bin/
+RUN sudo chmod +x /usr/local/bin/ros_entrypoint.sh
+ENTRYPOINT ["ros_entrypoint.sh"]
+CMD ["bash"]
