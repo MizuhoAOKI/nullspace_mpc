@@ -1,0 +1,83 @@
+# ---------- Base Image ----------
+FROM osrf/ros:noetic-desktop-full
+
+# ---------- Env & Args ----------
+ARG UID=1000
+ARG GID=1000
+ARG ROS_DISTRO=noetic
+ENV USERNAME=$ROS_DISTRO
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Asia/Tokyo
+ENV HOME=/home/$USERNAME
+ENV ROS_WS=$HOME/nullspace_mpc
+
+# ---------- System Packages (root) ----------
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        python3-pip \
+        python3-catkin-tools \ 
+        htop \
+        bash-completion \
+        tzdata \
+        mesa-utils \
+        curl \
+        ca-certificates \
+        gnupg \
+        lsb-release && \
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# ---------- Project-specific deps (root) ----------
+RUN mkdir -p /tmp/project_deps
+COPY Makefile /tmp/project_deps/
+COPY shell /tmp/project_deps/shell/
+RUN cd /tmp/project_deps && make install_deps && rm -rf /tmp/project_deps
+
+# ---------- Create Non-root User ----------
+RUN groupadd --gid $GID $USERNAME && \
+    useradd  --uid $UID --gid $GID -m -s /bin/bash $USERNAME && \
+    echo "$USERNAME:$USERNAME" | chpasswd && \
+    usermod -aG sudo $USERNAME && \
+    echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$USERNAME && \
+    chmod 0440 /etc/sudoers.d/$USERNAME
+
+# ---------- Switch to User & Create Workspace ----------
+USER $USERNAME
+WORKDIR $HOME
+
+# Create workspace and copy project files
+RUN mkdir -p ${ROS_WS}/src
+COPY --chown=$USERNAME:$USERNAME . ${ROS_WS}/
+
+# ---------- Python/ROS deps (non-root) ----------
+WORKDIR ${ROS_WS}
+RUN python3 -m pip install --no-cache-dir --upgrade pip && \
+    python3 -m pip install --no-cache-dir matplotlib numpy
+
+# rosdep setups
+RUN sudo rosdep init || true && \
+    rosdep update --rosdistro ${ROS_DISTRO} && \
+    sudo apt-get update && \
+    /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && \
+                  rosdep install --from-paths src --ignore-src -r -y --rosdistro ${ROS_DISTRO}"
+
+# ---------- Final shell setup ----------
+WORKDIR $HOME
+RUN sed -i "s/#force_color_prompt=yes/force_color_prompt=yes/" $HOME/.bashrc && \
+    { \
+      echo ""; \
+      echo "# Source ROS environment"; \
+      echo "source /opt/ros/${ROS_DISTRO}/setup.bash"; \
+      echo "if [ -f ${ROS_WS}/devel/setup.bash ]; then"; \
+      echo "  source ${ROS_WS}/devel/setup.bash"; \
+      echo "fi"; \
+      echo "export ROS_WORKSPACE=${ROS_WS}"; \
+      echo "# Ignore ROS 1 EOL warnings"; \
+      echo "export DISABLE_ROS1_EOL_WARNINGS=1"; \
+    } >> $HOME/.bashrc
+
+# ---------- Entrypoint ----------
+COPY --chown=$USERNAME:$USERNAME docker/ros_entrypoint.sh /usr/local/bin/
+RUN sudo chmod +x /usr/local/bin/ros_entrypoint.sh
+ENTRYPOINT ["ros_entrypoint.sh"]
+CMD ["bash"]

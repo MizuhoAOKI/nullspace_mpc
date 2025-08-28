@@ -2,8 +2,8 @@
 set -e -o pipefail
 
 # Configurable defaults
-: "${ROS_DISTRO:=noetic}"
-: "${ROS_WS:=/home/nullspace_mpc}"
+export ROS_DISTRO=${ROS_DISTRO:-noetic}
+export ROS_WS=${ROS_WS:-$HOME/nullspace_mpc}
 
 # Source ROS
 if [ -f "/opt/ros/${ROS_DISTRO}/setup.bash" ]; then
