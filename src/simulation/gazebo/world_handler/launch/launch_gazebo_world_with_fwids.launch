@@ -5,6 +5,8 @@
   <arg name="model" default="$(find world_handler)/xacro/fwids_vehicle.xacro"/>
   <arg name="gazebo_world_name" default="maze"/> <!-- empty, empty_garden, cylinder_garden, maze -->
   <arg name="rvizconfig" default="$(find world_handler)/rviz/fwids_vehicle.rviz" />
+  <arg name="show_gazebo_gui" default="true"/>
+  <arg name="gazebo_headless" default="false"/>
   <param name="robot_description" command="$(find xacro)/xacro $(arg model) --inorder"/>
 
   <!-- launch gazebo world -->
@@ -12,8 +14,8 @@
     <arg name="world_name" value="$(find world_handler)/world/$(arg gazebo_world_name).world"/>
     <arg name="paused" value="false"/>
     <arg name="use_sim_time" value="true"/>
-    <arg name="gui" value="true"/>
-    <arg name="headless" value="false"/>
+    <arg name="gui" value="$(arg show_gazebo_gui)"/>
+    <arg name="headless" value="$(arg gazebo_headless)"/>
     <arg name="debug" value="false"/>
   </include>
 

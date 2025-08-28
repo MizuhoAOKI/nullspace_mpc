@@ -90,6 +90,12 @@ navigation_nullspace_mpc:
 	source /opt/ros/noetic/setup.bash && source ./devel/setup.bash &&\
 	roslaunch launch/navigation.launch workspace:=${WORKSPACE} local_planner:=nullspace_mpc
 
+# navigation with nullspace_mpc (lite)
+navigation_nullspace_mpc_lite:
+	source /opt/ros/noetic/setup.bash && source ./devel/setup.bash &&\
+	export OMT_WAIT_POLICY=PASSIVE &&\
+	roslaunch launch/navigation.launch workspace:=${WORKSPACE} controller_mode:=lite  show_gazebo_gui:=false gazebo_headless:=true
+
 # navigation with mppi
 navigation_mppi:
 	source /opt/ros/noetic/setup.bash && source ./devel/setup.bash &&\
