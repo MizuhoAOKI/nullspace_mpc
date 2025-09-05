@@ -42,8 +42,8 @@ namespace planning
         latest_ref_path_ = *msg;
 
         // publish goal pose marker
-        //// publishGoalPoseArrowMarker(); // publish arrow marker
-        publishGoalPoseSphereMarker(); // publish sphere marker
+        publishGoalPoseArrowMarker(); // publish arrow marker
+        // publishGoalPoseSphereMarker(); // publish sphere marker
 
         if (!map_received_ || !ref_path_received_)
         {

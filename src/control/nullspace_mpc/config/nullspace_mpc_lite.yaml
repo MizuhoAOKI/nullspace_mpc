@@ -20,8 +20,10 @@ mpc_eval_msg_topic: /mpc/eval_info
 
 # navigation params
 navigation:
-  xy_goal_tolerance: 1.00  # [m]
-  yaw_goal_tolerance: 6.28  # [rad]
+  xy_goal_tolerance: 0.5  # [m]
+  yaw_goal_tolerance: 0.15 # [rad] set 6.28 to ignore angular error
+  goal_snap_distance_for_via_pos: 0.3 # [m]
+  goal_snap_distance_for_via_angle: 1.5 # [rad]
 
 # target_system params
 target_system:

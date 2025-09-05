@@ -12,7 +12,9 @@ MPC::MPC()
     //// navigation
     private_nh_.param<double>("navigation/xy_goal_tolerance", param.navigation.xy_goal_tolerance, 0.5); // [m]
     private_nh_.param<double>("navigation/yaw_goal_tolerance", param.navigation.yaw_goal_tolerance, 0.5); // [rad]
-    
+    private_nh_.param<double>("navigation/goal_snap_distance_for_via_pos", param.navigation.goal_snap_distance_for_via_pos, 0.1); // [m]
+    private_nh_.param<double>("navigation/goal_snap_distance_for_via_angle", param.navigation.goal_snap_distance_for_via_angle, 0.5); // [m]
+
     //// target_system
     private_nh_.param<double>("target_system/l_f", param.target_system.l_f, 0.5); // [m]
     private_nh_.param<double>("target_system/l_r", param.target_system.l_r, 0.5); // [m]
@@ -98,6 +100,8 @@ MPC::MPC()
     // set parameters
     lookahead_distance_ = param.controller.ref_velocity * param.controller.step_len_sec * param.controller.prediction_horizon; // [m]
     idx_via_states_ = param.controller.idx_via_states; // index of via states
+    goal_snap_distance_for_via_pos_ = param.navigation.goal_snap_distance_for_via_pos; // [m]
+    goal_snap_distance_for_via_angle_ = param.navigation.goal_snap_distance_for_via_angle; // [rad]
 
     // instantiate MPCCore class
     mpc_core_ = new controller::MPCCore(param);
@@ -246,17 +250,50 @@ std::vector<common_type::XYYaw> MPC::calcViaStateSequence(
         }
 
         // use direction from previous to current point
-        double yaw = 0.0;
-        if (current_idx > 0 && current_idx < ref_path.poses.size()) {
+        double via_x   = 0.0;
+        double via_y   = 0.0;
+        double via_yaw = 0.0;
+
+        // helper: squared distance from (x, y) to the global goal
+        auto dist2_to_goal = [&](double x, double y) {
+            const double dx = global_goal_state_.x - x;
+            const double dy = global_goal_state_.y - y;
+            return dx * dx + dy * dy;
+        };
+
+        if (current_idx < ref_path.poses.size() - 1) {
             const auto& prev = ref_path.poses[current_idx - 1].pose.position;
             const auto& curr = ref_path.poses[current_idx].pose.position;
-            yaw = std::atan2(curr.y - prev.y, curr.x - prev.x);
+
+            // decide via position
+            if (dist2_to_goal(via_x, via_y) < goal_snap_distance_for_via_pos_ * goal_snap_distance_for_via_pos_) {
+                // use goal position when close to goal
+                via_x = global_goal_state_.x;
+                via_y = global_goal_state_.y;
+            } else {
+                via_x = curr.x;
+                via_y = curr.y;
+            }
+
+            // decide via yaw
+            if (dist2_to_goal(via_x, via_y) < goal_snap_distance_for_via_angle_ * goal_snap_distance_for_via_angle_) {
+                // use goal angle when close to goal
+                via_yaw = global_goal_state_.yaw;
+            } else {
+                via_yaw = std::atan2(curr.y - prev.y, curr.x - prev.x);
+            }
+        }
+        else // when the end of the path is reached
+        {
+            via_x   = global_goal_state_.x;
+            via_y   = global_goal_state_.y;
+            via_yaw = global_goal_state_.yaw;
         }
 
         common_type::XYYaw via;
-        via.x = ref_path.poses[current_idx].pose.position.x;
-        via.y = ref_path.poses[current_idx].pose.position.y;
-        via.yaw = yaw;
+        via.x   = via_x;
+        via.y   = via_y;
+        via.yaw = via_yaw;
         via_states.push_back(via);
     }
 

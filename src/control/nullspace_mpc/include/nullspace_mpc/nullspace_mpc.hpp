@@ -99,6 +99,8 @@ namespace controller
             // parameters
             double lookahead_distance_; // [m]
             std::vector<int> idx_via_states_; // index of via states
+            double goal_snap_distance_for_via_pos_; // [m]
+            double goal_snap_distance_for_via_angle_; // [m]
 
             // mppi core instance
             MPCCore* mpc_core_;

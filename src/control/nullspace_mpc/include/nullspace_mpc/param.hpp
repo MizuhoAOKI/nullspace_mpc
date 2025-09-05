@@ -12,6 +12,8 @@ struct Param
     {
         double xy_goal_tolerance;
         double yaw_goal_tolerance;
+        double goal_snap_distance_for_via_pos;
+        double goal_snap_distance_for_via_angle;
     };
     Navigation navigation;
 

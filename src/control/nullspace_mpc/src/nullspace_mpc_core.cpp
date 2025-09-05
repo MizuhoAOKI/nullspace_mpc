@@ -28,8 +28,8 @@ MPCCore::MPCCore(param::Param& param)
     input_opt_latest_ = Control(); // size is (UDIM)
     input_opt_seq_latest_ = ControlSeq(T, Control()); // size is (T, UDIM)
     input_samples_ = ControlSeqSamples(K, ControlSeq(T, Control())); // size is (K, T, UDIM)
-    noises_ = ViaStateSeqSamples(K, ViaStateSeq(VT, ViaState())); // size is (K, T, UDIM)
-    sigma_ = ViaStateSeq(VT, ViaState()); // size is (T, UDIM)
+    noises_ = ViaStateSeqSamples(K, ViaStateSeq(VT, ViaState())); // size is (K, VT, UDIM)
+    sigma_ = ViaStateSeq(VT, ViaState()); // size is (VT, UDIM)
 
     // initialize via_state_opt_seq_
     for (int vt = 0; vt < VT; vt++)
@@ -69,7 +69,7 @@ MPCCore::~MPCCore()
     // No Contents
 }
 
-// mppi solver
+// nullspace mpc solver
 common_type::VxVyOmega MPCCore::solveMPC(
     const common_type::XYYaw& observed_state,
     const common_type::VxVyOmega& observed_velocity,
@@ -106,8 +106,8 @@ common_type::VxVyOmega MPCCore::solveMPC(
 
     // get the previous command velocity
     //// use the latest command velocity
-    double global_vx = input_opt_latest_.vx * std::cos(observed_state.yaw) - input_opt_latest_.vy * std::sin(observed_state.yaw);
-    double global_vy = input_opt_latest_.vx * std::sin(observed_state.yaw) + input_opt_latest_.vy * std::cos(observed_state.yaw);
+    double global_vx = input_opt_latest_.vx;
+    double global_vy = input_opt_latest_.vy;
     double global_yawrate = input_opt_latest_.omega;
     //// (alternative option) use the observed velocity
     // double global_vx = observed_velocity.vx * std::cos(observed_state.yaw) - observed_velocity.vy * std::sin(observed_state.yaw);
@@ -139,14 +139,14 @@ common_type::VxVyOmega MPCCore::solveMPC(
         for (int vt = 0; vt < VT; vt++)
         {
             // reference yaw angle of the target via state is via_state_sequence[vt].yaw
-            // transform noises_ to the local frame of the target via state
+            // transform noises_ into the global frame of the target via state
             double yaw = via_state_sequence[vt].yaw;
-            double frenet_x_noise = noises_[k][vt].x * std::cos(yaw) - noises_[k][vt].y * std::sin(yaw);
-            double frenet_y_noise = noises_[k][vt].x * std::sin(yaw) + noises_[k][vt].y * std::cos(yaw);
+            double global_x_noise = noises_[k][vt].x * std::cos(yaw) - noises_[k][vt].y * std::sin(yaw);
+            double global_y_noise = noises_[k][vt].x * std::sin(yaw) + noises_[k][vt].y * std::cos(yaw);
             via_state_samples_[k][vt].update(
                 Eigen::Matrix<double, 3, 1>(
-                    via_state_opt_seq_[vt].x + frenet_x_noise,
-                    via_state_opt_seq_[vt].y + frenet_y_noise,
+                    via_state_opt_seq_[vt].x + global_x_noise,
+                    via_state_opt_seq_[vt].y + global_y_noise,
                     wrapAngle(via_state_opt_seq_[vt].yaw + noises_[k][vt].yaw, observed_state.yaw)
                 )
             );
@@ -222,9 +222,22 @@ common_type::VxVyOmega MPCCore::solveMPC(
     // calculate optimal via state sequence
     for (int k = 0; k < K; k++)
     {
-        for (int vt = 0; vt < VT; vt++)
+        for (int vt = 0; vt < VT; ++vt)
         {
-            via_state_opt_seq_[vt].update(via_state_opt_seq_[vt].eigen() + weights_[k] * noises_[k][vt].eigen());
+            // rotate only the translational (x,y) local-frame noise into the global frame by yaw.
+            const double yaw = via_state_sequence[vt].yaw;
+            const double c = std::cos(yaw), s = std::sin(yaw);
+            const double global_dx = noises_[k][vt].x * c - noises_[k][vt].y * s;
+            const double global_dy = noises_[k][vt].x * s + noises_[k][vt].y * c;
+
+            // yaw is common between local and global frames. add directly, then wrap.
+            via_state_opt_seq_[vt].update(
+                Eigen::Matrix<double, 3, 1>(
+                    via_state_opt_seq_[vt].x + weights_[k] * global_dx,
+                    via_state_opt_seq_[vt].y + weights_[k] * global_dy,
+                    wrapAngle(via_state_opt_seq_[vt].yaw + weights_[k] * noises_[k][vt].yaw, observed_state.yaw)
+                )
+            );
         }
     }
 
@@ -380,7 +393,7 @@ double MPCCore::wrapAngle(double yaw, double center_yaw)
 ViaStateSeqSamples MPCCore::generateNoiseMatrix(ViaStateSeq& sigma)
 {
     // declare noise matrix
-    ViaStateSeqSamples noises = ViaStateSeqSamples(K, ViaStateSeq(T, ViaState()));
+    ViaStateSeqSamples noises = ViaStateSeqSamples(K, ViaStateSeq(VT, ViaState()));
 
     // set random value to noises, which is normal distribution with mean 0.0 and variance sigma[t][u]
     // [CPU Acceleration with OpenMP]
@@ -427,7 +440,7 @@ Samples MPCCore::calcWeightsOfSamples(const Samples& costs)
 
     // update ranking of costs // 1th: best (i.e. minimum cost), K: worst (i.e. maximum cost)
     std::iota(costs_rank_.begin(), costs_rank_.end(), 0); // initialize costs_rank_ with 0, 1, 2, ..., K-1
-    std::sort(costs_rank_.begin(), costs_rank_.end(), [&](int i, int j) { return costs_[i] < costs_[j]; }); // sort costs_rank_ based on costs_ value
+    std::sort(costs_rank_.begin(), costs_rank_.end(), [&](int i, int j) { return costs[i] < costs[j]; }); // sort costs_rank_ based on costs_ value
     // Note: best (minimum) cost is costs_[costs_rank_[0]], worst (maximum) cost is costs_[costs_rank_[K-1]]
 
     return weights;
