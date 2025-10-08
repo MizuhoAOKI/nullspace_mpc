@@ -1,5 +1,7 @@
 # Nullspace MPC
-**Nullspace Model Predictive Controller for a Swerve Drive Robot**
+
+Nullspace MPC is a novel multi-objective control framework for explicitly handling task priorities.
+It demonstrates agile and smooth navigation through a narrow environment with a swerve drive vehicle.
 
 <div align="center">
 
@@ -11,23 +13,6 @@
 ![nullspace_mpc_anim_3drviz](./media/nullspace_mpc_anim_3drviz.gif)
 
 </div>
-
-## Citation
-> [!NOTE]
-> Nullspace MPC is a core component of my Ph.D. dissertation, which will be made publicly available on October 1, 2025. Links to the dissertation and related publications will be added here as soon as they are available.
-
-The baseline MPPI controller is based on the following work and is available in a dedicated repository: [mppi_swerve_drive_ros](https://github.com/MizuhoAOKI/mppi_swerve_drive_ros)  
-```bibtex
-@inproceedings{mizuho2024iros,
-  author={Aoki, Mizuho and Honda, Kohei and Okuda, Hiroyuki and Suzuki, Tatsuya},
-  booktitle={2024 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)}, 
-  title={Switching Sampling Space of Model Predictive Path-Integral Controller to Balance Efficiency and Safety in 4WIDS Vehicle Navigation}, 
-  year={2024},
-  volume={},
-  number={},
-  pages={3196-3203},
-  doi={10.1109/IROS58592.2024.10802359}}
-```
 
 ## Setup
 
@@ -207,10 +192,37 @@ Runs an evaluation script that automatically sends multiple goals in sequence (d
 > [!NOTE]
 > Due to the asynchronous nature of ROS simulations and the sampling-based algorithm relying on multi-threading computation, the controllers' performance can vary depending on your system environment.
 
+## Citation
+If you use this software in your research, please consider citing the following papers.
+
+Nullspace MPC is a core component of my Ph.D. dissertation, which was made publicly available on October 1, 2025.
+You can access the full paper via the [project website](https://mizuhoaoki.github.io/projects/nullspace_mpc).
+```bibtex
+  @phdthesis{mizuho2025phd,
+    author    = {Mizuho Aoki},
+    title     = {{Nonlinear Model Predictive Control for Autonomous Vehicles: Enhancement via Simplified Physics-Aware Prediction and Decomposed Optimization}},
+    school    = {Nagoya University},
+    year      = {2025},
+    type      = {Ph.D. Dissertation},
+    language  = {English},
+    url       = {https://mizuhoaoki.github.io/projects/nullspace_mpc}
+  }
+```
+
+The baseline MPPI controller is based on the following work and is available in a dedicated repository: [mppi_swerve_drive_ros](https://github.com/MizuhoAOKI/mppi_swerve_drive_ros)  
+```bibtex
+@inproceedings{mizuho2024iros,
+  author={Aoki, Mizuho and Honda, Kohei and Okuda, Hiroyuki and Suzuki, Tatsuya},
+  booktitle={2024 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)}, 
+  title={{Switching Sampling Space of Model Predictive Path-Integral Controller to Balance Efficiency and Safety in 4WIDS Vehicle Navigation}}, 
+  year={2024},
+  pages={3196-3203},
+  doi={10.1109/IROS58592.2024.10802359}
+}
+```
+
 ## License & Acknowledgements
 
-The majority of this project is licensed under the MIT License.
+This project is licensed under the MIT License, with the exception of its core QP solving capability, which is provided by [QpSolverCollection](https://github.com/isri-aist/QpSolverCollection), located in the `src/third_party` directory and licensed under the BSD 2-Clause License.
 
-However, the core QP solving capability is provided by [QpSolverCollection](https://github.com/isri-aist/QpSolverCollection), which is included in the `src/third_party` directory and is licensed under the BSD 2-Clause License. See `src/third_party/QpSolverCollection/LICENSE` for details.
-
-We are deeply grateful to the authors of [isri-aist/QpSolverCollection](https://github.com/isri-aist/QpSolverCollection) for developing and open-sourcing the useful library.
+Special thanks to the authors of QpSolverCollection for their excellent work.
