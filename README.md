@@ -43,7 +43,7 @@ Note: This is the recommended setup for optimal performance.
     ```bash
     cd <path-to-your-workspace>/nullspace_mpc
     sudo rosdep init # Skip if already initialized
-    rosdep update
+    rosdep update --rosdistro noetic
     rosdep install -y --from-paths src --ignore-src --rosdistro noetic
     ```
 
